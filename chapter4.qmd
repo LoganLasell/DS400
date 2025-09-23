@@ -237,14 +237,39 @@ For each statement below, indicate whether the statement is true or false. Provi
 -   strongly favoring π>0.5
 
 1.  Beta(1.8,1.8)
+```{r}
+plot_beta(1.8,1.8)
+# centering π>0.5 
+```
+
 
 2.  Beta(3,2)
+```{r}
+plot_beta(3,2)
+#somewhat favoring π>0.5
+```
+
 
 3.  Beta(1,10)
+```{r}
+plot_beta(1,10)
+# strongly favoring π<0.5
+```
+
 
 4.  Beta(1,3)
+```{r}
+plot_beta(1,3)
+#somewhat favoring π<0.5
+```
+
 
 5.  Beta(17,2)
+```{r}
+plot_beta(17,2)
+#strongly favoring π>0.5
+```
+
 
 **Exercise 4.2 (Match the plot to the code)** Which arguments to the `plot_beta_binomial()` function generated the plot below?
 
@@ -260,16 +285,44 @@ For each statement below, indicate whether the statement is true or false. Provi
 
 6.  `alpha = 8, beta = 3, y = 2, n = 4`
 
+########NOTE FROM LOGAN, CANT FIND IMAGE ON GITHUB########
+
 ![](images/clipboard-2366982972.png)
 
 **Exercise 4.7 (What dominates the posterior?)** In each situation below you will be given a Beta prior for π and some Binomial trial data. For each scenario, identify which of the following is true: the prior has more influence on the posterior, the data has more influence on the posterior, or the posterior is an equal compromise between the data and the prior.
 
 1.  Prior: π∼Beta(1,4), data: Y=8 successes in n=10 trials
+```{r}
+plot_beta_binomial(1, 4, y = 8, n = 10)
+#data is more influential to posterior
+
+```
+
 
 2.  Prior: π∼Beta(20,3), data: Y=0 successes in n=1 trial
+```{r}
+plot_beta_binomial(20,3, y = 0, n = 1)
+# prior is more influential to posterior
+```
+
 
 3.  Prior: π∼Beta(4,2), data: Y=1 success in n=3 trials
+```{r}
+plot_beta_binomial(4,2, y = 1, n = 3)
+#compromise between influence of data and prior on posterior
+```
+
 
 4.  Prior: π∼Beta(3,10), data: Y=10 successes in n=13 trials
+```{r}
+plot_beta_binomial(3,10, y = 10, n = 13)
+# compromise between influence of data and prior on posterior
+```
+
 
 5.  Prior: π∼Beta(20,2), data: Y=10 successes in n=200 trials
+```{r}
+plot_beta_binomial(20,2, y = 10, n = 200)
+# data has more influence on posterior
+```
+
