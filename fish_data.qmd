@@ -1,0 +1,32 @@
+---
+title: "bayesian_classwork"
+format: html
+editor: visual
+---
+
+## Names: Logan and Brandon
+
+```{r}
+library(bayesrules)
+```
+
+```{r}
+
+fish_data <- data.frame(
+  Trip_ID      = 1:10,
+  Casts        = c(10, 12, 8, 15, 20, 25, 30, 18, 10, 14),
+  Fish_Caught  = c(3, 5, 2, 6, 9, 13, 11, 7, 4, 5)
+)
+sum(fish_data$Casts)
+
+mean_fish_caught <- 65/162
+
+sum(fish_data$Fish_Caught)
+
+print(fish_data)
+
+```
+
+```{r}
+plot_gamma_poisson(shape = 324  , rate = 162 , sum_y = 65 , n = 162)
+```
