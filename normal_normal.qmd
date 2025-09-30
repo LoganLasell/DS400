@@ -20,13 +20,36 @@ No matter the parameters, the Normal model is bell-shaped and symmetric around �
 Play with the parameter below
 
 ```{r}
-plot_normal(mean = 10, sd = 2)
+plot_normal(mean = 10, sd = 1) +
+  geom_vline(xintercept = 9, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 11, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 8, color = "coral") +
+  geom_vline(xintercept = 12, color = "coral") +
+  theme_minimal()
 ```
 
 Using our understanding of a Normal model, we can now *tune* the prior hyperparameters θ and τ to reflect our prior understanding and uncertainty about the average hippocampal volume among people that have a history of concussions, μ. Based on our rigorous Wikipedia research that hippocampal volumes tend to be between 6 and 7 cm3, we’ll set the Normal prior mean θ to the midpoint, 6.5. Further, we’ll set the Normal prior standard deviation to τ=0.4. In other words, by [(5.12)](https://www.bayesrulesbook.com/chapter-5#eq:normal-scale), we think there’s a 95% chance that μ is somewhere between 5.7 and 7.3 cm3 (6.5±2∗0.4). This range is *wider*, and hence more conservative, than what Wikipedia indicated. Our uncertainty here reflects the fact that we didn’t vet the Wikipedia sources, we aren’t confident that the features for the typical adult translates to people with a history of concussions, and we generally aren’t sure what’s going on here (i.e., we’re not brain experts). Putting this together, our tuned prior model for μ is:
 
 ```{r}
-plot_normal(mean = 6.5, sd = 0.4)
+plot_normal(mean = 6.5, sd = 0.4) +
+  geom_vline(xintercept = 6.9, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 6.1, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 7.3, color = "coral") +
+  geom_vline(xintercept = 5.7, color = "coral") +
+  theme_minimal()
+```
+
+*Challenge*
+
+-   Add 4 `geom_vline()` to the plot above to indicate 1 standard deviation capturing 68% of the data and 2 standard deviations capturing 95% of the data
+
+```{r}
+plot_normal(mean = 6.5, sd = 0.4) +
+  geom_vline(xintercept = 6.9, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 6.1, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 7.3, color = "coral") +
+  geom_vline(xintercept = 5.7, color = "coral") +
+  theme_minimal()
 ```
 
 Let’s apply and examine this result in our analysis of μ, the average hippocampal volume among people that have a history of concussions. We’ve already built our prior model of μ, μ∼N(6.5,0.42). Next, consider some data. The `football` data in **bayesrules**, a subset of the `FootballBrain` data in the **Lock5Data** package ([Lock et al. 2016](https://www.bayesrulesbook.com/chapter-5#ref-lock2016statistics)), includes results for a cross-sectional study of hippocampal volumes among 75 subjects ([Singh et al. 2014](https://www.bayesrulesbook.com/chapter-5#ref-singh2014relationship)): 25 collegiate football players with a history of concussions (`fb_concuss`), 25 collegiate football players that do not have a history of concussions (`fb_no_concuss`), and 25 control subjects. For our analysis, we’ll focus on the n=25 subjects with a history of concussions (`fb_concuss`):
@@ -34,6 +57,29 @@ Let’s apply and examine this result in our analysis of μ, the average hippoca
 ```{r}
 # Load the data
 data(football)
+```
+
+*Challenge*
+
+-   Visualize the football data in an interesting way utilizing `ggplot(()`
+
+```{r}
+ggplot(football, aes(x = group, y = volume, fill = group )) +
+  geom_boxplot(alpha = 0.6, outlier.shape = NA)+
+  geom_jitter(width = 0.5, alpha = 0.7, size = 2) +
+  labs(title = "Hippocampal Volume by Group" )
+```
+
+```{r}
+ggplot(football, aes(x = years, y = volume, color = group)) +
+  geom_point() +
+  geom_smooth()
+```
+
+Back to our example
+
+```{r}
+
 concussion_subjects <- football %>%
   filter(group == "fb_concuss")
 ```
@@ -44,19 +90,62 @@ concussion_subjects %>%
 ```
 
 ```{r}
-ggplot(concussion_subjects, aes(x = volume)) + 
+ggplot(concussion_subjects, aes(x = volume)) +
   geom_density()
 ```
 
-We plot this likelihood function using `plot_normal_likelihood()`, providing our observed `volume` data and data standard deviation σ=0.5 This likelihood illustrates the compatibility of our observed hippocampal data with different μ values. To this end, the hippocampal patterns observed in our data would most likely have arisen if the mean hippocampal volume across *all* people with a history of concussions, μ, were between 5.3 and 6.1 cm3. Further, we’re *most* likely to have observed a mean volume of ¯¯¯y= 5.735 among our 25 sample subjects if the underlying population mean μ were also 5.735.
+```{r}
+ggplot(concussion_subjects, aes(x = volume)) + 
+  geom_histogram(bins = 5)
+```
 
 ```{r}
-plot_normal_likelihood(y = concussion_subjects$volume, sigma = 0.5)
+concussion_subjects %>% 
+  summarize(sd(volume))
 ```
+
+We plot this likelihood function using `plot_normal_likelihood()`, providing our observed `volume` data and data standard deviation σ=0.59 This likelihood illustrates the compatibility of our observed hippocampal data with different μ values. To this end, the hippocampal patterns observed in our data would most likely have arisen if the mean hippocampal volume across *all* people with a history of concussions, μ, were between 5.3 and 6.1 cm3. Further, we’re *most* likely to have observed a mean volume of ¯¯¯y= 5.735 among our 25 sample subjects if the underlying population mean μ were also 5.735.
+
+```{r}
+plot_normal_likelihood(y = concussion_subjects$volume, sigma = 0.59) 
+```
+
+It is important to note that we are not modeling the distribution of concussion patients hippocampal volume as we did above with `geom_density()`
+
+-   It is important to note that we are plotting **distributions over μ (the population mean)**, not over individual data
+
+-   likelihood_sd = σ/√n = 0.59/√25 = 0.12
 
 Bringing all of these pieces together, we plot and summarize our Normal-Normal analysis of μ using `plot_normal_normal()` and `summarize_normal_normal()` in the **bayesrules** package. Though a compromise between the prior and data, our posterior understanding of μ is more heavily influenced by the latter. In light of our data, we are much more *certain* about the mean hippocampal volume among people with a history of concussions, and believe that this figure is somewhere in the range from 5.586 to 5.974 cm3 (5.78±2∗0.097).
 
 ```{r}
-plot_normal_normal(mean = 6.5, sd = 0.4, sigma = 0.5,
+plot_normal_normal(mean = 6.5, sd = 0.4, sigma = 0.59,
                    y_bar = 5.735, n = 25)
 ```
+
+```{r}
+summarize_normal_normal(mean = 6.5, sd = 0.4, sigma = 0.59,
+                   y_bar = 5.735, n = 25)
+```
+
+### Challenge
+
+AI Prompting
+
+-   Go back to your modeling scenarios that you created last class
+
+-   Show your data, code, and outputs to an AI assistant
+
+-   Ask it to critique your analysis
+
+    -   Are there alternate/better bayesian methods/models to apply to the question your asking? Think of what we have covered (beta-binomial, gamma-poisson, normal-normal)
+
+    No the gamma-poisson model is not a good fit for this data because it doesn't account for heterogeneity in the across total trips. The better fit would be to use a beta-binomial model.
+
+    -   What assumptions are associated with the model you chose? With those assumptions in mind, is the model still a good fit for your question/data?
+
+    A main assumption associated with the model we chose was that every trip/cast has the same probability of catching a fish, which isn't true in the real world, and within our data.
+
+    -   Are there real datasets you can use to answer your question opposed to AI generated datasets?
+
+Yes I could go to a website that counts real fish caught compared to trip amount/cast amount (if there is one), because using a real world data set would account for more influential factors to catching fish, like, time of last cast, fishing location, and more.

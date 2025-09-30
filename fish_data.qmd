@@ -19,7 +19,7 @@ fish_data <- data.frame(
 )
 sum(fish_data$Casts)
 
-mean_fish_caught <- 65/162
+mean_fish_caught <- mean(fish_data$Casts)
 
 sum(fish_data$Fish_Caught)
 
@@ -28,5 +28,10 @@ print(fish_data)
 ```
 
 ```{r}
+summarize()
+```
+
+```{r}
 plot_gamma_poisson(shape = 324  , rate = 162 , sum_y = 65 , n = 162)
+
 ```
