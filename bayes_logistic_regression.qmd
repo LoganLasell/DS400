@@ -70,6 +70,57 @@ weather %>%
 
 ### Rain Model 1
 
+Priors:
+
+✅ From probability → log-odds
+
+-   our prior understanding that on an average day, there’s a roughly 20% chance of rain
+
+Use the logit (log-odds) transformation:
+
+```{r}
+qlogis(0.2)
+```
+
+qlogis(0.2) \# \[1\] -1.386294 → about -1.4 log-odds
+
+✅ From log-odds → probability
+
+Use the **inverse logit** (often called the logistic function):
+
+```{r}
+plogis(-1.4)
+```
+
+SD = 0.7
+
+```{r}
+plogis(-2.8)
+plogis(0)
+```
+
+This says: *before seeing data*, you think an average day’s rain probability is most likely around 20%, but **could reasonably be anywhere from \~6% to \~50%** (quite wide—intentionally weakly informative).
+
+Prior slope
+
+```{r}
+exp(0.07)
+```
+
+```{r}
+(1.072508 - 1) * 100
+```
+
+An odds ratio of ≈ 1.072 means that **for each +1 percentage point increase in humidity**, the **odds of rain multiply by 1.072**, i.e. they increase by about **7.2 %**.
+
+```{r}
+(exp(0.07 - 0.07) - 1) * 100
+(exp(0.07 + 0.07) - 1) * 100
+```
+
+The odds of rain might increase anywhere from 0% to 15% for every extra percentage point in humidity level:
+
+
 ```{r}
  rain_model_1 <- stan_glm(raintomorrow ~ humidity9am,
                              data = weather, family = binomial,
@@ -164,7 +215,7 @@ Plans change. Hotel room bookings get canceled. In the next exercises, you’ll 
 Your analysis will incorporate the following variables on hotel bookings:
 
 | Variable | Notation | Meaning |
-|-------------------------|-------------------------|-----------------------|
+|------------------------|------------------------|------------------------|
 | **is_canceled** | ( Y ) | whether or not the booking was canceled |
 | **lead_time** | ( X_1 ) | number of days between the booking and scheduled arrival |
 | **previous_cancellations** | ( X_2 ) | number of previous times the guest has canceled a booking |
@@ -205,11 +256,12 @@ Questions:
 
     ```{r}
     ggplot(hotel_data, aes(x = average_daily_rate, y = lead_time, color = is_canceled )) +
-      geom_point(alpha = 0.6) 
+      geom_point(alpha = 0.6) +
+      geom_smooth()
     ```
 
     ```{r}
-    ggplot(hotel_data, aes(x = lead_time, color = is_canceled)) +
+ggplot(hotel_data, aes(x = lead_time, color = is_canceled)) +
       geom_histogram()
     ```
 
@@ -220,9 +272,34 @@ Questions:
         1.  prior_intercept = normal(-0.7, 1.5)
 
         2.  prior = normal(0, 0.5, autoscale = TRUE)
+        
+```{r}
+hotel_model <- stan_glm(
+                        is_canceled ~ .,
+                        data = hotel_data,
+                        family = binomial,
+                        prior_intercept = normal(-0.7, 1.5),
+                        prior = normal(0, 0.5, autoscale = TRUE),
+                        chains = 4, iter = 5000*2, seed = 84735 
+                        )
+```
+
 
 4.  Use `exp(posterior_interval()` to interpret key predictors
+```{r}
+exp(posterior_interval(hotel_model, prob = 0.8))
+```
 
 5.  Use `classification_summary` to interpret model accuracy
 
+```{r}
+classification_summary(hotel_model, hotel_data)
+```
+
+
     1.  Use different values for the cutoff argument and see how sensitivity and specificity change
+    
+```{r}
+classification_summary(hotel_model, hotel_data, cutoff = 0.5)
+```
+    
